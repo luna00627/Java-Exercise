@@ -68,11 +68,23 @@ public class PhotoEditor {
                 if (selectedImage != null && !textField.getText().isEmpty()) {
                     try {
                         fontSize = Integer.parseInt(fontSizeField.getText());
-                        addTextToImage(selectedImage, textField.getText());
+                        int x = Integer.parseInt(positionOfX.getText());
+                        int y = Integer.parseInt(positionOfY.getText());
+
+                        if (y > 200) {
+                            throw new IllegalArgumentException("位置Y不能超過200");
+                        }
+                        if (x < 0 || y < 0) {
+                            throw new IllegalArgumentException("位置X和位置Y不能小於0");
+                        }
+
+                        addTextToImage(selectedImage, textField.getText(), x, y);
                         updateImageLabel();
                         saveImage(selectedImage, "D://output.jpg");
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(frame, "請輸入有效的字體大小（整數）");
+                    } catch (IllegalArgumentException ex) {
+                        JOptionPane.showMessageDialog(frame, ex.getMessage());
                     }
                 } else {
                     JOptionPane.showMessageDialog(frame, "請先選擇照片並輸入文字");
@@ -215,22 +227,19 @@ public class PhotoEditor {
         return new ImageIcon(scaledImage);
     }
 
-    private static void addTextToImage(BufferedImage image, String text) {
+    private static void addTextToImage(BufferedImage image, String text, int x, int y) {
         Graphics2D g = image.createGraphics();
         g.setColor(selectedColor);
         g.setFont(new Font(selectedFontName, Font.PLAIN, fontSize));
-        int x = Integer.parseInt(positionOfX.getText());
-        int y = Integer.parseInt(positionOfY.getText());
         g.drawString(text, x, y);
         g.dispose();
     }
 
-    private static void saveImage(BufferedImage image, String outputPath) {
+    private static void saveImage(BufferedImage image, String filePath) {
         try {
-            File outputFile = new File(outputPath);
-            ImageIO.write(image, "jpg", outputFile);
-        } catch (IOException e) {
-            e.printStackTrace();
+            ImageIO.write(image, "jpg", new File(filePath));
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
