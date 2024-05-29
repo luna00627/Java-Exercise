@@ -24,11 +24,13 @@ public class PhotoEditor {
     private static Color selectedColor = Color.RED;  // 預設文字顏色
     private static String selectedFontName = "宋體"; // 預設字體名稱
     private static int fontSize = 50; // 預設字體大小
+    private static JTextField positionOfX;
+    private static JTextField positionOfY;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("照片編輯器");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 800);  // Initial frame size
+        frame.setSize(800, 600);  // Initial frame size
 
         JButton uploadButton = new JButton("選擇照片");
         JButton addTextButton = new JButton("添加文字");
@@ -50,6 +52,8 @@ public class PhotoEditor {
                         selectedImage = ImageIO.read(selectedFile);
                         originalImage = ImageIO.read(selectedFile);
                         zoomFactor = 1.0;
+                        positionOfX.setText(Integer.toString(selectedImage.getWidth() / 2));
+                        positionOfY.setText(Integer.toString(selectedImage.getHeight() / 2));
                         updateImageLabel();
                     } catch (IOException ex) {
                         ex.printStackTrace();
@@ -98,7 +102,7 @@ public class PhotoEditor {
         controlPanelTop.add(uploadButton);
         controlPanelTop.add(new JLabel("輸入文字:"));
         controlPanelTop.add(textField);
-        controlPanelTop.add(new JLabel("字體大小:"));
+        controlPanelTop.add(new JLabel("文字大小:"));
         controlPanelTop.add(fontSizeField);
         controlPanelTop.add(addTextButton);
         controlPanelTop.add(clearTextButton);
@@ -168,13 +172,18 @@ public class PhotoEditor {
             }
         });
 
+        positionOfX = new JTextField(3);
+        positionOfY = new JTextField(3);
+
         JPanel controlPanelBottom = new JPanel();
         controlPanelBottom.add(new JLabel("文字顏色:"));
         controlPanelBottom.add(colorComboBox);
         controlPanelBottom.add(new JLabel("字體:"));
         controlPanelBottom.add(fontComboBox);
-        controlPanelBottom.add(new JLabel("文字位置:"));
-        controlPanelBottom.add(positionComboBox);
+        controlPanelBottom.add(new JLabel("文字位置(x):"));
+        controlPanelBottom.add(positionOfX);
+        controlPanelBottom.add(new JLabel("文字位置(y):"));
+        controlPanelBottom.add(positionOfY);
 
         frame.add(controlPanelTop, "North");
         frame.add(controlPanelBottom, "South");
@@ -210,7 +219,9 @@ public class PhotoEditor {
         Graphics2D g = image.createGraphics();
         g.setColor(selectedColor);
         g.setFont(new Font(selectedFontName, Font.PLAIN, fontSize));
-        g.drawString(text, image.getWidth() / 2, image.getHeight() / 2);
+        int x = Integer.parseInt(positionOfX.getText());
+        int y = Integer.parseInt(positionOfY.getText());
+        g.drawString(text, x, y);
         g.dispose();
     }
 
@@ -259,4 +270,3 @@ public class PhotoEditor {
         }
     }
 }
-
