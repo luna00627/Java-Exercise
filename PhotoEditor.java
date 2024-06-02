@@ -35,6 +35,7 @@ public class PhotoEditor {
         JButton uploadButton = new JButton("選擇照片");
         JButton addTextButton = new JButton("添加文字");
         JButton clearTextButton = new JButton("清除文字");
+        JButton saveImageButton = new JButton("保存圖片");
         JTextField textField = new JTextField(20);
         JTextField fontSizeField = new JTextField("50", 3); // 預設字體大小為50
         JSlider zoomSlider = new JSlider(10, 200, 100);  // Slider range from 10% to 200%
@@ -68,23 +69,10 @@ public class PhotoEditor {
                 if (selectedImage != null && !textField.getText().isEmpty()) {
                     try {
                         fontSize = Integer.parseInt(fontSizeField.getText());
-                        int x = Integer.parseInt(positionOfX.getText());
-                        int y = Integer.parseInt(positionOfY.getText());
-
-                        if (y > 200) {
-                            throw new IllegalArgumentException("位置Y不能超過200");
-                        }
-                        if (x < 0 || y < 0) {
-                            throw new IllegalArgumentException("位置X和位置Y不能小於0");
-                        }
-
-                        addTextToImage(selectedImage, textField.getText(), x, y);
+                        addTextToImage(selectedImage, textField.getText());
                         updateImageLabel();
-                        saveImage(selectedImage, "D://output.jpg");
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(frame, "請輸入有效的字體大小（整數）");
-                    } catch (IllegalArgumentException ex) {
-                        JOptionPane.showMessageDialog(frame, ex.getMessage());
                     }
                 } else {
                     JOptionPane.showMessageDialog(frame, "請先選擇照片並輸入文字");
@@ -98,6 +86,29 @@ public class PhotoEditor {
                 if (originalImage != null) {
                     selectedImage = deepCopy(originalImage);
                     updateImageLabel();
+                }
+            }
+        });
+
+        saveImageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (selectedImage != null) {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setDialogTitle("保存圖片");
+                    fileChooser.setFileFilter(new ImageFilter());
+                    int result = fileChooser.showSaveDialog(frame);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        File saveFile = fileChooser.getSelectedFile();
+                        try {
+                            ImageIO.write(selectedImage, "jpg", saveFile);
+                            JOptionPane.showMessageDialog(frame, "圖片保存成功！");
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(frame, "圖片保存失敗：" + ex.getMessage());
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "請先選擇並編輯照片");
                 }
             }
         });
@@ -120,6 +131,7 @@ public class PhotoEditor {
         controlPanelTop.add(clearTextButton);
         controlPanelTop.add(new JLabel("縮放:"));
         controlPanelTop.add(zoomSlider);
+        controlPanelTop.add(saveImageButton);
 
         String[] colors = { "Blue", "Cyan", "Gray", "Green", "Magenta", "Orange", "Pink", "Red", "Yellow", "White", "Black" };
         JComboBox<String> colorComboBox = new JComboBox<>(colors);
@@ -227,19 +239,22 @@ public class PhotoEditor {
         return new ImageIcon(scaledImage);
     }
 
-    private static void addTextToImage(BufferedImage image, String text, int x, int y) {
+    private static void addTextToImage(BufferedImage image, String text) {
         Graphics2D g = image.createGraphics();
         g.setColor(selectedColor);
         g.setFont(new Font(selectedFontName, Font.PLAIN, fontSize));
+        int x = Integer.parseInt(positionOfX.getText());
+        int y = Integer.parseInt(positionOfY.getText());
         g.drawString(text, x, y);
         g.dispose();
     }
 
-    private static void saveImage(BufferedImage image, String filePath) {
+    private static void saveImage(BufferedImage image, String outputPath) {
         try {
-            ImageIO.write(image, "jpg", new File(filePath));
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            File outputFile = new File(outputPath);
+            ImageIO.write(image, "jpg", outputFile);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
