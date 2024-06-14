@@ -1,0 +1,1 @@
+專案裡lib為所有的jar檔，src為所有java檔案，主程式為HomePage，其他未成功加入主程式的功能為Gif、RemoveBackground
